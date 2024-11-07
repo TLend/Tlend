@@ -102,7 +102,7 @@ interface GovernorBravoInterface {
 }
 
 contract FinanceLens {
-    uint public constant BLOCKS_PER_DAY = 86400 / 15;
+    uint public constant BLOCKS_PER_DAY = 86400 / 12;
  
     struct PendingReward {
         address cTokenAddress;

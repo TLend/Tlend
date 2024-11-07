@@ -15,7 +15,7 @@ contract TLEND is ERC20, AccessControl {
 
     uint256 public constant BASE_COST = 300_000_000 * 10**18; // Cost of 300 million TITANX tokens
     uint256 public currentTlendMinable = 200_000; // Initially 200,000 TLENDX can be mined daily
-    uint256 public blockInterval = 15; // Ethereum block time (seconds)
+    uint256 public blockInterval = 12; // Ethereum block time (seconds)
     uint256 public constant AMPLIFICATION_FACTOR = 1e10;
 
     uint256 public lastReductionBlock;

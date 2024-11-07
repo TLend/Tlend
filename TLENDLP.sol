@@ -10,7 +10,7 @@ contract TLENDLP is ERC20, AccessControl, Pausable {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     uint256 public constant AMPLIFICATION_FACTOR = 1e10;
-    uint256 public blockInterval = 15; // Ethereum block time (seconds)
+    uint256 public blockInterval = 12; // Ethereum block time (seconds)
 
 
     struct MintInfo {
