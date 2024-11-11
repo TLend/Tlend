@@ -13,6 +13,7 @@ contract PurchaseManager is Ownable {
     IUniswapV3Factory public factory;
     IERC20 public x28Token;
     IERC20 public tlendToken;
+    address public comptroller;
 
     uint256 public maxX28Amount = 300_000_000 * 10**18; // Max X28 amount per swap
     uint256 public lastSwapTime;
@@ -36,6 +37,10 @@ contract PurchaseManager is Ownable {
 
     function setFeeTier(uint24 _feeTier) external onlyOwner {
         feeTier = _feeTier;
+    }
+
+    function setComptroller(address _comptroller) external onlyOwner {
+        comptroller = _comptroller;
     }
 
     function canSwap() public view returns (bool) {
@@ -76,9 +81,15 @@ contract PurchaseManager is Ownable {
 
         uint256 amountOut = swapRouter.exactInputSingle(params);
 
-        // If there is output, transfer TLEND to a burn address or the contract itself, if needed
-        if (amountOut > 0) {
-            tlendToken.transfer(0x000000000000000000000000000000000000dEaD, amountOut);
+        // Distribute 20% to comptroller and burn 80%
+        uint256 toComptroller = (amountOut * 20) / 100;
+        uint256 toBurn = amountOut - toComptroller;
+
+        if (toComptroller > 0) {
+            tlendToken.transfer(comptroller, toComptroller);
+        }
+        if (toBurn > 0) {
+            tlendToken.transfer(0x000000000000000000000000000000000000dEaD, toBurn);
         }
 
         // Update lastSwapTime after a successful swap
