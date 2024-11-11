@@ -13,13 +13,13 @@ contract TLEND is ERC20, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    uint256 public constant BASE_COST = 300_000_000 * 10**18; // Cost of 300 million TITANX tokens
+    uint256 public constant BASE_COST = 300_000_000 * 10**18; // Cost of 300 million X28 tokens
     uint256 public currentTlendMinable = 200_000; // Initially 200,000 TLENDX can be mined daily
     uint256 public blockInterval = 12; // Ethereum block time (seconds)
     uint256 public constant AMPLIFICATION_FACTOR = 1e10;
 
     uint256 public lastReductionBlock;
-    IERC20 public titanxToken;
+    IERC20 public x28Token;
     TLENDLP public minerCertificate;
 
     address public liquidityManager;
@@ -29,8 +29,8 @@ contract TLEND is ERC20, AccessControl {
     address public initialLiquidityContract;
 
     uint256 public constant INITIAL_LIQUIDITY_AMOUNT = 1_000_000_000 * 10**18; 
-    uint256 public constant INITIAL_TITANX_THRESHOLD = 30_000_000_000 * 10**18; 
-    uint256 public initialTitanxReceived; 
+    uint256 public constant INITIAL_X28_THRESHOLD = 30_000_000_000 * 10**18; 
+    uint256 public initialX28Received; 
 
     uint256 public constant LIQUIDITY_PERCENT = 30;
     uint256 public constant LIQUIDATION_PERCENT = 20;
@@ -49,13 +49,13 @@ contract TLEND is ERC20, AccessControl {
 
     mapping(address => mapping(uint256 => MinerInfo)) public miners;
 
-    constructor(address certificateAddress, address _titanxToken, address _initialLiquidityContract) ERC20("TLEND", "TLEND Finance") {
+    constructor(address certificateAddress, address _x28Token, address _initialLiquidityContract) ERC20("TLEND", "TLEND Finance") {
         _grantRole(ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
 
         minerCertificate = TLENDLP(certificateAddress);
         lastReductionBlock = block.number;
-        titanxToken = IERC20(_titanxToken); 
+        x28Token = IERC20(_x28Token); 
         initialLiquidityContract = _initialLiquidityContract;
         _mint(initialLiquidityContract, INITIAL_LIQUIDITY_AMOUNT);
     }
@@ -89,10 +89,10 @@ contract TLEND is ERC20, AccessControl {
         uint256 blocksForDuration = (daysDuration * 86400) / blockInterval;
         uint256 endBlock = block.number + blocksForDuration;
 
-        uint256 titanxCost = (BASE_COST * miningPower) / 100;
-        require(titanxToken.balanceOf(to) >= titanxCost, "Insufficient TITANX balance");
+        uint256 x28Cost = (BASE_COST * miningPower) / 100;
+        require(x28Token.balanceOf(to) >= x28Cost, "Insufficient X28 balance");
 
-        receiveAndDistributeTITANX(titanxCost);
+        receiveAndDistributeX28(x28Cost);
 
         uint256 baseExchangeRate = currentTlendMinable / (86400 / blockInterval);
         uint256 adjustedExchangeRate = (baseExchangeRate * miningPower * AMPLIFICATION_FACTOR) / 100;
@@ -179,45 +179,45 @@ contract TLEND is ERC20, AccessControl {
         initialLiquidityContract = _initialLiquidityContract;
     }
 
-    function distributeTITANX(uint256 totalAmount) internal {
-        if (initialTitanxReceived < INITIAL_TITANX_THRESHOLD) {
+    function distributeX28(uint256 totalAmount) internal {
+        if (initialX28Received < INITIAL_X28_THRESHOLD) {
             
-            uint256 remaining = INITIAL_TITANX_THRESHOLD - initialTitanxReceived;
+            uint256 remaining = INITIAL_X28_THRESHOLD - initialX28Received;
             uint256 toTransfer = totalAmount > remaining ? remaining : totalAmount;
-            titanxToken.safeTransfer(initialLiquidityContract, toTransfer);
-            initialTitanxReceived += toTransfer;
+            x28Token.safeTransfer(initialLiquidityContract, toTransfer);
+            initialX28Received += toTransfer;
 
             if (totalAmount > toTransfer) {
-                _distributeRemainingTITANX(totalAmount - toTransfer);
+                _distributeRemainingX28(totalAmount - toTransfer);
             }
         } else {
-            _distributeRemainingTITANX(totalAmount);
+            _distributeRemainingX28(totalAmount);
         }
     }
 
-    function _distributeRemainingTITANX(uint256 totalAmount) internal {
+    function _distributeRemainingX28(uint256 totalAmount) internal {
         uint256 liquidityAmount = (totalAmount * LIQUIDITY_PERCENT) / 100;
         uint256 liquidationAmount = (totalAmount * LIQUIDATION_PERCENT) / 100;
         uint256 purchaseAmount = (totalAmount * PURCHASE_PERCENT) / 100;
         uint256 operationsAmount = (totalAmount * OPERATIONS_PERCENT) / 100;
 
         if (liquidityManager != address(0)) {
-            titanxToken.safeTransfer(liquidityManager, liquidityAmount);
+            x28Token.safeTransfer(liquidityManager, liquidityAmount);
         }
         if (liquidationReserve != address(0)) {
-            titanxToken.safeTransfer(liquidationReserve, liquidationAmount);
+            x28Token.safeTransfer(liquidationReserve, liquidationAmount);
         }
         if (purchaseManager != address(0)) {
-            titanxToken.safeTransfer(purchaseManager, purchaseAmount);
+            x28Token.safeTransfer(purchaseManager, purchaseAmount);
         }
         if (operationsTreasury != address(0)) {
-            titanxToken.safeTransfer(operationsTreasury, operationsAmount);
+            x28Token.safeTransfer(operationsTreasury, operationsAmount);
         }
       
     }
 
-    function receiveAndDistributeTITANX(uint256 amount) internal {
-        titanxToken.safeTransferFrom(msg.sender, address(this), amount);
-        distributeTITANX(amount);
+    function receiveAndDistributeX28(uint256 amount) internal {
+        x28Token.safeTransferFrom(msg.sender, address(this), amount);
+        distributeX28(amount);
     }
 }

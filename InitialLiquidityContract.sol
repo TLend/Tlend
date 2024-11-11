@@ -10,10 +10,10 @@ contract InitialLiquidityContract is AccessControl {
 
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    IERC20 public titanxToken;
+    IERC20 public x28Token;
     IERC20 public tlendToken;
 
-    uint256 public constant TITANX_TARGET_BALANCE = 30_000_000_000 * 10**18; 
+    uint256 public constant X28_TARGET_BALANCE = 30_000_000_000 * 10**18; 
     uint256 public constant TLEND_TARGET_BALANCE = 1_000_000_000 * 10**18;   
 
     constructor() {
@@ -35,14 +35,14 @@ contract InitialLiquidityContract is AccessControl {
     }
 
     /**
-     * @notice Sets the address of the TITANX token.
-     * @param _titanxToken The address of the TITANX token contract.
+     * @notice Sets the address of the X28 token.
+     * @param _x28Token The address of the X28 token contract.
      */
-    function setTitanxToken(address _titanxToken) external {
+    function setx28Token(address _x28Token) external {
         require(hasRole(ADMIN_ROLE, msg.sender), "Caller is not an admin");
         
-        require(_titanxToken != address(0), "Invalid TITANX token address");
-        titanxToken = IERC20(_titanxToken);
+        require(_x28Token != address(0), "Invalid X28 token address");
+        x28Token = IERC20(_x28Token);
     }
 
     /**

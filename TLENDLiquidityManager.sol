@@ -11,13 +11,13 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 contract TLENDLiquidityManager is Ownable {
     INonfungiblePositionManager public positionManager;
     IUniswapV3Factory public factory;
-    IERC20 public titanxToken;
+    IERC20 public x28Token;
     IERC20 public tlendToken;
 
     IERC20 public token0; // Example ERC20 token
     IERC20 public token1; //  Example ERC20 token
 
-    uint256 public maxTITANXAmount = 300_000_000 * 10**18; // Max TITANX amount per liquidity addition
+    uint256 public maxX28Amount = 300_000_000 * 10**18; // Max X28 amount per liquidity addition
     uint256 public lastAddLiquidityTime;
     uint256 public constant ADD_LIQUIDITY_INTERVAL = 180 * 60; // 280 minutes in seconds
 
@@ -29,14 +29,14 @@ contract TLENDLiquidityManager is Ownable {
 
     }
 
-    function setTokens(address _titanxToken, address _tlendToken) external onlyOwner {
-        titanxToken = IERC20(_titanxToken);
+    function setTokens(address _x28Token, address _tlendToken) external onlyOwner {
+        x28Token = IERC20(_x28Token);
         tlendToken = IERC20(_tlendToken);
         _updateTokenOrder();
     }
 
-    function setMaxTITANXAmount(uint256 _maxAmount) external onlyOwner {
-        maxTITANXAmount = _maxAmount;
+    function setMaxX28Amount(uint256 _maxAmount) external onlyOwner {
+        maxX28Amount = _maxAmount;
     }
 
     function setRecipient(address _recipient) external onlyOwner {
@@ -46,9 +46,9 @@ contract TLENDLiquidityManager is Ownable {
     
      function addSingleSidedLiquidity( ) external {
         require(canAddLiquidity(), "Cannot add liquidity yet");
-        uint256 amount = maxTITANXAmount;
+        uint256 amount = maxX28Amount;
          bool isToken0;
-        if(token1 == titanxToken){
+        if(token1 == x28Token){
             isToken0 = false;
         }else{
             isToken0 = true;
@@ -124,19 +124,19 @@ contract TLENDLiquidityManager is Ownable {
 
     // Update token order based on addresses
     function _updateTokenOrder() internal {
-        if (address(titanxToken) < address(tlendToken)) {
-            token0 = titanxToken;
+        if (address(x28Token) < address(tlendToken)) {
+            token0 = x28Token;
             token1 = tlendToken;
         } else {
             token0 = tlendToken;
-            token1 = titanxToken;
+            token1 = x28Token;
         }
     }
 
     // Function to check if liquidity can be added
     function canAddLiquidity() public view returns (bool) {
         bool timeCondition = (block.timestamp >= lastAddLiquidityTime + ADD_LIQUIDITY_INTERVAL);
-        bool balanceCondition = titanxToken.balanceOf(address(this)) >= maxTITANXAmount;
+        bool balanceCondition = x28Token.balanceOf(address(this)) >= maxX28Amount;
         return timeCondition && balanceCondition;
     }
 }
