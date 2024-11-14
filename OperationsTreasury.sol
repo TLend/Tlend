@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract OperationsTreasury is Ownable {
-    
+    constructor() Ownable(msg.sender) {}
     /**
      * @notice Allows the owner to withdraw a specified ERC20 token from the contract.
      * @param token The address of the ERC20 token to withdraw.

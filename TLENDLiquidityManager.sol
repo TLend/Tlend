@@ -1,12 +1,45 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 pragma abicoder v2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
-import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
-import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+// import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
+// import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
+// import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 
+interface INonfungiblePositionManager {
+    struct MintParams {
+        address token0;
+        address token1;
+        uint24 fee;
+        int24 tickLower;
+        int24 tickUpper;
+        uint256 amount0Desired;
+        uint256 amount1Desired;
+        uint256 amount0Min;
+        uint256 amount1Min;
+        address recipient;
+        uint256 deadline;
+    }
+    function mint(MintParams calldata params) external returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1);
+    function factory() external view returns (address);
+}
+
+interface IUniswapV3Factory {
+    function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool);
+}
+
+interface IUniswapV3Pool {
+    function slot0() external view returns (
+        uint160 sqrtPriceX96,
+        int24 tick,
+        uint16 observationIndex,
+        uint16 observationCardinality,
+        uint16 observationCardinalityNext,
+        uint8 feeProtocol,
+        bool unlocked
+    );
+}
 
 contract TLENDLiquidityManager is Ownable {
     INonfungiblePositionManager public positionManager;
@@ -19,11 +52,11 @@ contract TLENDLiquidityManager is Ownable {
 
     uint256 public maxX28Amount = 300_000_000 * 10**18; // Max X28 amount per liquidity addition
     uint256 public lastAddLiquidityTime;
-    uint256 public constant ADD_LIQUIDITY_INTERVAL = 180 * 60; // 280 minutes in seconds
+    uint256 public  ADD_LIQUIDITY_INTERVAL = 180 * 60; // 280 minutes in seconds
 
     address public recipient = address(this);
 
-    constructor() {
+    constructor() Ownable(msg.sender) {
         positionManager = INonfungiblePositionManager(0x1238536071E1c677A632429e3655c799b22cDA52);
         factory = IUniswapV3Factory(0x0227628f3F023bb0B980b67D528571c95c6DaC1c);
 
@@ -37,6 +70,10 @@ contract TLENDLiquidityManager is Ownable {
 
     function setMaxX28Amount(uint256 _maxAmount) external onlyOwner {
         maxX28Amount = _maxAmount;
+    }
+
+      function setAddLiquidityInterval(uint256 _AddLiquidityInterval) external onlyOwner {
+        ADD_LIQUIDITY_INTERVAL = _AddLiquidityInterval;
     }
 
     function setRecipient(address _recipient) external onlyOwner {

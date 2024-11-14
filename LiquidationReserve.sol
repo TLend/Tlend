@@ -59,7 +59,7 @@ interface IQuoterV2 {
     );
 }
 
-contract CompoundLiquidator {
+contract LiquidationReserve {
 
     IComptroller public comptroller;
     address public cTLENDLP;
@@ -70,8 +70,8 @@ contract CompoundLiquidator {
     uint24 public constant FEE_TIER = 3000;
 
     constructor( ) {
-        comptroller = IComptroller(0xb7B397302D86c5764774BaE0676A374EEeDE5F8d);
-        cTLENDLP = 0x500F50fc13EAc29c2AB37b037670B79d3b02D9fB;
+        comptroller = IComptroller(0x2F5eDb3BdC2464248bAc7e084e5FF6D4e4D2dbD2);
+        cTLENDLP = 0xF6151a201233b4b04357d085DCD568798b018e51;
         X28 = 0x8e5aaBFB44F78bD80A5Db482e3a63281Df66B7C4;
         swapRouter = IV3SwapRouter(0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E);
         factory = IUniswapV3Factory(0x0227628f3F023bb0B980b67D528571c95c6DaC1c);
